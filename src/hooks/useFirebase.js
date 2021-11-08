@@ -1,7 +1,11 @@
 import { useEffect, useState } from "react";
 import initializeFirebaseApp from "../Pages/Login/Firebase/firebase.init";
 
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, updateProfile } from "firebase/auth";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, getIdToken, updateProfile } from "firebase/auth";
+
+
+//get id token link
+//  https://firebase.google.com/docs/auth/admin/verify-id-tokens
 
 initializeFirebaseApp();
 
@@ -12,6 +16,10 @@ const useFirebase = () => {
     const [isLoading, setIsLoading] = useState(true);
 
     const [authError, setAuthError] = useState('');
+
+    const [admin, setAdmin] = useState(false);
+
+    const [token, setToken] = useState('')
 
     const auth = getAuth();
     const googleProvider = new GoogleAuthProvider();
@@ -92,6 +100,16 @@ const useFirebase = () => {
             }).finally(() => setIsLoading(false));
     };
 
+    //get admin 
+
+    useEffect(() => {
+        fetch(`https://damp-springs-90927.herokuapp.com/users/${user.email}`)
+            .then(res => res.json())
+            .then(data => {
+                setAdmin(data.admin)
+            })
+    }, [user.email]);
+
 
     const logOut = () => {
         setIsLoading(true);
@@ -109,7 +127,7 @@ const useFirebase = () => {
     const saveUser = (email, displayName, method) => {
         const user = { email, displayName };
 
-        fetch('http://localhost:5000/users', {
+        fetch('https://damp-springs-90927.herokuapp.com/users', {
             //sending data thats why POST
             method: method,
             headers: {
@@ -128,6 +146,10 @@ const useFirebase = () => {
 
 
                 setUser(user);
+                getIdToken(user)
+                    .then(idToken => {
+                        setToken(idToken)
+                    })
             } else {
                 setUser({});
             }
@@ -136,7 +158,7 @@ const useFirebase = () => {
 
         return () => unsubscribe;
 
-    }, [])
+    }, [auth])
 
 
 
@@ -145,8 +167,10 @@ const useFirebase = () => {
     //retun object
     return {
         user,
+        admin,
         isLoading,
         authError,
+        token,
         setUser,
         registerUser,
         loginUser,

@@ -5,7 +5,7 @@ import {
   BrowserRouter as Router,
   Switch,
   Route,
-  Link
+
 } from "react-router-dom";
 import Home from './Pages/Home/Home/Home';
 import Appointment from './Pages/Appointment/Appointment';
@@ -33,7 +33,7 @@ function App() {
             <Route exact path='/login'>
               <Login></Login>
             </Route>
-            <PrivateRoute exact path='/dashboard'>
+            <PrivateRoute path='/dashboard'>
               <Dashboard></Dashboard>
             </PrivateRoute>
             <Route exact path='/register'>
